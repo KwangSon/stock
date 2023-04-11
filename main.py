@@ -33,14 +33,19 @@ def send_email(user, pwd, recipient, subject, body):
 
 
 with open('kospi.txt') as f:
-    lines = [line.strip() for line in f]
+    company_codes = [line.strip() for line in f]
+company_codes.pop(0)
 
-lines.pop(0)
+with open('block.txt') as f:
+    block_codes = [line.strip() for line in f]
+
+for block_code in block_codes:
+    company_codes.remove(block_code)
 
 message = ""
 cnt = 0
 
-for code in lines:
+for code in company_codes:
     ticker = yf.Ticker(code + ".ks")
     if not 'fiftyTwoWeekLowChangePercent' in ticker.info:
         print(ticker.info)
