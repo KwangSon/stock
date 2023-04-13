@@ -2,6 +2,7 @@ import yfinance as yf
 import smtplib
 import json
 from datetime import date
+from prettytable import PrettyTable as pt
 
 
 def send_email(user, pwd, recipient, subject, body):
@@ -42,8 +43,10 @@ with open('block.txt') as f:
 for block_code in block_codes:
     company_codes.remove(block_code)
 
-message = ""
 cnt = 0
+
+tb = pt()
+tb.field_names = ["ID", "Name", "LowP"]
 
 for code in company_codes:
     ticker = yf.Ticker(code + ".ks")
@@ -52,15 +55,16 @@ for code in company_codes:
         continue
 
     if (ticker.info['fiftyTwoWeekLowChangePercent'] < 0.03):
-        message += ('symbol : {}, shortName : {}, 52w_low_% : {}'.format(
-            ticker.info['symbol'], ticker.info['shortName'], ticker.info['fiftyTwoWeekLowChangePercent'])) + '\n'
+        tb.add_row([ticker.info['symbol'][:-3], ticker.info['shortName'],
+                   round(ticker.info['fiftyTwoWeekLowChangePercent'], 3)])
         cnt += 1
-        if (cnt == 10):
-            break
+
+    if __debug__ and cnt == 2:
+        break
 
 with open(".secret", "r") as json_file:
     secret_data = json.load(json_file)
 
 mail_header = "Report " + str(date.today())
 send_email(secret_data['mail_id'], secret_data['mail_key'],
-           secret_data['recipient'], mail_header, message)
+           secret_data['recipient'], mail_header, tb.get_string())
