@@ -70,17 +70,22 @@ if __name__ == '__main__':
     tb.field_names = ["ID", "Name", "LowP", "NaverInfo"]
 
     for code in company_codes:
-        ticker = yf.Ticker(code + ".ks")
-        if not 'fiftyTwoWeekLowChangePercent' in ticker.info:
-            print(ticker.info)
-            continue
+        try:
+            ticker = yf.Ticker(code + ".ks")
+            if not 'fiftyTwoWeekLowChangePercent' in ticker.info:
+                print(ticker.info)
+                continue
 
-        if (ticker.info['fiftyTwoWeekLowChangePercent'] < 0.03):
-            n_per_list = per_from_n(code)
-            if (float(n_per_list[8]) < 10):  # 2022.12
-                tb.add_row([ticker.info['symbol'][:-3], ticker.info['shortName'],
-                            round(ticker.info['fiftyTwoWeekLowChangePercent'], 3), str(n_per_list)])
-                cnt += 1
+            if (ticker.info['fiftyTwoWeekLowChangePercent'] < 0.03):
+                n_per_list = per_from_n(code)
+                if (float(n_per_list[8]) < 10):  # 2022.12
+                    tb.add_row([ticker.info['symbol'][:-3], ticker.info['shortName'],
+                                round(ticker.info['fiftyTwoWeekLowChangePercent'], 3), str(n_per_list)])
+                    cnt += 1
+        except:
+            with open('bug.txt','a') as f:
+                f.writelines(code)
+            continue
 
         if __debug__ and cnt == 2:
             break
