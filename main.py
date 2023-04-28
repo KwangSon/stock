@@ -6,6 +6,8 @@ from prettytable import PrettyTable as pt
 import requests
 from bs4 import BeautifulSoup
 
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 def per_from_n(code):
     url = "https://finance.naver.com/item/main.nhn?code=" + code
@@ -33,20 +35,29 @@ def send_email(user, pwd, recipient, subject, body):
         print('---------------------')
         return
 
-    FROM = user
     TO = recipient if isinstance(recipient, list) else [recipient]
-    SUBJECT = subject
-    TEXT = body
 
     # Prepare actual message
-    message = """From: %s\nTo: %s\nSubject: %s\n\n%s
-    """ % (FROM, ", ".join(TO), SUBJECT, TEXT)
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = subject
+    msg['From'] = user
+    msg['To'] = ", ".join(TO)
+
+    text = "good investment"
+    html = "<html><head></head><body>" + body + "</body></html>"
+
+    part1 = MIMEText(text, 'plain')
+    part2 = MIMEText(html, 'html')
+
+    msg.attach(part1)
+    msg.attach(part2)
+
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.ehlo()
         server.starttls()
         server.login(user, pwd)
-        server.sendmail(FROM, TO, message)
+        server.sendmail(user, TO, msg.as_string())
         server.close()
         print('successfully sent the mail')
     except:
