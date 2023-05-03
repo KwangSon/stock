@@ -5,9 +5,10 @@ from datetime import date
 from prettytable import PrettyTable as pt
 import requests
 from bs4 import BeautifulSoup
-
+import html
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
 
 def per_from_n(code):
     url = "https://finance.naver.com/item/main.nhn?code=" + code
@@ -29,12 +30,6 @@ def per_from_n(code):
 
 def send_email(user, pwd, recipient, subject, body):
 
-    if __debug__:
-        print('-----mail debug------')
-        print('{}\n{}'.format(subject, body))
-        print('---------------------')
-        return
-
     TO = recipient if isinstance(recipient, list) else [recipient]
 
     # Prepare actual message
@@ -51,6 +46,12 @@ def send_email(user, pwd, recipient, subject, body):
 
     msg.attach(part1)
     msg.attach(part2)
+
+    if __debug__:
+        print('-----mail debug------')
+        print('{}\n{}'.format(subject, msg.as_string()))
+        print('---------------------')
+        return
 
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
@@ -78,7 +79,7 @@ if __name__ == '__main__':
     cnt = 0
 
     tb = pt()
-    tb.field_names = ["ID", "Name", "LowP", "NaverInfo"]
+    tb.field_names = ["ID", "Name", "LowP", "NaverInfo", "NaverPER"]
 
     for code in company_codes:
         try:
@@ -89,12 +90,13 @@ if __name__ == '__main__':
 
             if (ticker.info['fiftyTwoWeekLowChangePercent'] < 0.03):
                 n_per_list = per_from_n(code)
+                n_stat_link = "https://finance.naver.com/item/main.nhn?code=" + code
                 if (float(n_per_list[8]) < 10):  # 2022.12
                     tb.add_row([ticker.info['symbol'][:-3], ticker.info['shortName'],
-                                round(ticker.info['fiftyTwoWeekLowChangePercent'], 3), str(n_per_list)])
+                                round(ticker.info['fiftyTwoWeekLowChangePercent'], 3), '<a href=' + '"' + n_stat_link + '"' + '>NLink</a>', str(n_per_list)])
                     cnt += 1
         except:
-            with open('bug.txt','a') as f:
+            with open('bug.txt', 'a') as f:
                 f.writelines(code)
             continue
 
@@ -106,4 +108,4 @@ if __name__ == '__main__':
 
     mail_header = "Report " + str(date.today())
     send_email(secret_data['mail_id'], secret_data['mail_key'],
-               secret_data['recipient'], mail_header, tb.get_html_string())
+               secret_data['recipient'], mail_header, html.unescape(tb.get_html_string(format=True)))
