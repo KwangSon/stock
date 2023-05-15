@@ -1,31 +1,11 @@
-import yfinance as yf
 import smtplib
 import json
 from datetime import date
 from prettytable import PrettyTable as pt
-import requests
-from bs4 import BeautifulSoup
 import html
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
-
-def per_from_n(code):
-    url = "https://finance.naver.com/item/main.nhn?code=" + code
-
-    res = requests.get(url)
-    # print(res.text)
-    soup = BeautifulSoup(res.text, "lxml")
-
-    rv_per = []
-
-    captions = soup.find("div", {"class": "cop_analysis"}).find_all('tr')
-    for caption in captions:
-        if (caption.find('th').get_text() == 'PER(배)'):
-            per_list = caption.find_all('td')
-            for per in per_list:
-                rv_per.append(per.get_text().strip())
-    return rv_per
+import nv_stock
 
 
 def send_email(user, pwd, recipient, subject, body):
@@ -82,22 +62,25 @@ if __name__ == '__main__':
     tb.field_names = ["ID", "Name", "LowP", "NaverInfo", "NaverPER"]
 
     for code in company_codes:
-        try:
-            ticker = yf.Ticker(code + ".ks")
-            if not 'fiftyTwoWeekLowChangePercent' in ticker.info:
-                print(ticker.info)
-                continue
+        soup = nv_stock.get_code_soup(code)
+        cp = nv_stock.current_price(soup)
+        min_52 = nv_stock.get_52_min_max(soup)[0]
+        change_52 = min_52 / cp
 
-            if (ticker.info['fiftyTwoWeekLowChangePercent'] < 0.03):
-                n_per_list = per_from_n(code)
-                n_stat_link = "https://finance.naver.com/item/main.nhn?code=" + code
-                if (float(n_per_list[8]) < 10):  # 2022.12
-                    tb.add_row([ticker.info['symbol'][:-3], ticker.info['shortName'],
-                                round(ticker.info['fiftyTwoWeekLowChangePercent'], 3), '<a href=' + '"' + n_stat_link + '"' + '>NLink</a>', str(n_per_list)])
+        if __debug__:
+            print('code: {}, current_price: {}, min_52: {}, change_52: {}'.format(
+                code, cp, min_52, change_52))
+        try:
+            if (change_52 < 0.8):
+                n_per_list = nv_stock.get_per_list(soup)
+                n_stat_link = nv_stock.get_code_url(code)
+                if (n_per_list[8] and float(n_per_list[8]) < 10):  # 2022.12
+                    tb.add_row([code, 'tmp',
+                                round(change_52, 3), '<a href=' + '"' + n_stat_link + '"' + '>NLink</a>', str(n_per_list)])
                     cnt += 1
-        except:
+        except Exception as e:
             with open('bug.txt', 'a') as f:
-                f.writelines(code)
+                f.writelines('{} : {}\n'.format(code, e))
             continue
 
         if __debug__ and cnt == 2:
