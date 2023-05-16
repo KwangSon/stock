@@ -67,9 +67,7 @@ if __name__ == '__main__':
         min_52 = nv_stock.get_52_min_max(soup)[0]
         change_52 = min_52 / cp
 
-        if __debug__:
-            print('code: {}, current_price: {}, min_52: {}, change_52: {}'.format(
-                code, cp, min_52, change_52))
+        print('code: {}, current_price: {}, min_52: {}, change_52: {}'.format(code, cp, min_52, change_52))
         try:
             if (change_52 < 0.8):
                 n_per_list = nv_stock.get_per_list(soup)
