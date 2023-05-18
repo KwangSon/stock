@@ -29,7 +29,7 @@ def send_email(user, pwd, recipient, subject, body):
 
     if __debug__:
         print('-----mail debug------')
-        print('{}\n{}'.format(subject, msg.as_string()))
+        print('{}\n{}'.format(subject, body))
         print('---------------------')
         return
 
@@ -67,13 +67,14 @@ if __name__ == '__main__':
         min_52 = nv_stock.get_52_min_max(soup)[0]
         change_52 = min_52 / cp
 
-        print('code: {}, current_price: {}, min_52: {}, change_52: {}'.format(code, cp, min_52, change_52))
+        print('code: {}, current_price: {}, min_52: {}, change_52: {}'.format(
+            code, cp, min_52, change_52))
         try:
-            if (change_52 < 0.8):
+            if (change_52 > 0.8):
                 n_per_list = nv_stock.get_per_list(soup)
                 n_stat_link = nv_stock.get_code_url(code)
                 if (n_per_list[8] and float(n_per_list[8]) < 10):  # 2022.12
-                    tb.add_row([code, 'tmp',
+                    tb.add_row([code, nv_stock.get_company_name(soup),
                                 round(change_52, 3), '<a href=' + '"' + n_stat_link + '"' + '>NLink</a>', str(n_per_list)])
                     cnt += 1
         except Exception as e:

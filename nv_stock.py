@@ -14,6 +14,11 @@ def get_code_soup(code):
     return soup
 
 
+def get_company_name(soup):
+    corp_scope = soup.find("div", {"class": "wrap_company"})
+    return corp_scope.find('a').text
+
+
 def get_per_list(soup):
     rv_per = []
 
@@ -27,6 +32,9 @@ def get_per_list(soup):
             per_list = caption.find_all('td')
             for per in per_list:
                 rv_per.append(per.get_text().strip())
+            break
+    if (len(rv_per) != 10):
+        return ['', '', '', '', '', '', '', '', '', '']
     return rv_per
 
 
@@ -50,17 +58,25 @@ if __name__ == '__main__':
     import unittest
 
     class TestStringMethods(unittest.TestCase):
+        test_code = '452260'
+
         def test_per_list(self):
-            soup = get_code_soup('089860')
+            soup = get_code_soup(self.test_code)
             per_list = get_per_list(soup)
             self.assertEqual(len(per_list), 10)
 
         def test_52_min_max(self):
-            soup = get_code_soup('089860')
-            print(get_52_min_max(soup))
+            soup = get_code_soup(self.test_code)
+            self.assertEqual(len(get_52_min_max(soup)), 2)
+            self.assertIsInstance(get_52_min_max(soup)[0], int)
+            self.assertIsInstance(get_52_min_max(soup)[1], int)
 
         def test_current_price(self):
-            soup = get_code_soup('089860')
-            print(current_price(soup))
+            soup = get_code_soup(self.test_code)
+            self.assertIsInstance(current_price(soup), int)
+
+        def test_company_name(self):
+            soup = get_code_soup(self.test_code)
+            self.assertIsInstance(get_company_name(soup), str)
 
     unittest.main()
