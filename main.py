@@ -70,7 +70,7 @@ if __name__ == '__main__':
         print('code: {}, current_price: {}, min_52: {}, change_52: {}'.format(
             code, cp, min_52, change_52))
         try:
-            if (change_52 > 0.8):
+            if (change_52 > 0.9):
                 n_per_list = nv_stock.get_per_list(soup)
                 n_stat_link = nv_stock.get_code_url(code)
                 if (n_per_list[8] and float(n_per_list[8]) < 10):  # 2022.12
