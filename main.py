@@ -45,6 +45,13 @@ def send_email(user, pwd, recipient, subject, body):
         print("failed to send mail")
 
 
+def contain_negative(per_list):
+    for per in per_list:
+        if (per and float(per) < 0):
+            return True
+    return False
+
+
 if __name__ == '__main__':
     with open('kospi.txt') as f:
         company_codes = [line.strip() for line in f]
@@ -73,6 +80,8 @@ if __name__ == '__main__':
             if (change_52 > 0.9):
                 n_per_list = nv_stock.get_per_list(soup)
                 n_stat_link = nv_stock.get_code_url(code)
+                if (contain_negative(n_per_list)):
+                    continue
                 if (n_per_list[8] and float(n_per_list[8]) < 10):  # 2022.12
                     tb.add_row([code, nv_stock.get_company_name(soup),
                                 round(change_52, 3), '<a href=' + '"' + n_stat_link + '"' + '>NLink</a>', str(n_per_list)])

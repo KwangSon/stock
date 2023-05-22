@@ -31,7 +31,7 @@ def get_per_list(soup):
         if (caption.find('th').get_text() == 'PER(배)'):
             per_list = caption.find_all('td')
             for per in per_list:
-                rv_per.append(per.get_text().strip())
+                rv_per.append(per.get_text().strip().replace(',', ''))
             break
     if (len(rv_per) != 10):
         return ['', '', '', '', '', '', '', '', '', '']
