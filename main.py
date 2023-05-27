@@ -82,7 +82,8 @@ if __name__ == '__main__':
                 n_stat_link = nv_stock.get_code_url(code)
                 if (contain_negative(n_per_list)):
                     continue
-                if (n_per_list[8] and float(n_per_list[8]) < 10):  # 2022.12
+                if (n_per_list[8] and float(n_per_list[8]) < 10 and
+                    n_per_list[2] and float(n_per_list[2]) < 10): # prev quater and year PER
                     tb.add_row([code, nv_stock.get_company_name(soup),
                                 round(change_52, 3), '<a href=' + '"' + n_stat_link + '"' + '>NLink</a>', str(n_per_list)])
                     cnt += 1
