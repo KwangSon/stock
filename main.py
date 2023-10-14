@@ -69,14 +69,14 @@ if __name__ == '__main__':
     tb.field_names = ["ID", "Name", "LowP", "NaverInfo", "NaverPER"]
 
     for code in company_codes:
-        soup = nv_stock.get_code_soup(code)
-        cp = nv_stock.current_price(soup)
-        min_52 = nv_stock.get_52_min_max(soup)[0]
-        change_52 = min_52 / cp
-
-        print('code: {}, current_price: {}, min_52: {}, change_52: {}'.format(
-            code, cp, min_52, change_52))
         try:
+            soup = nv_stock.get_code_soup(code)
+            cp = nv_stock.current_price(soup)
+            min_52 = nv_stock.get_52_min_max(soup)[0]
+            change_52 = min_52 / cp
+
+            print('code: {}, current_price: {}, min_52: {}, change_52: {}'.format(
+            code, cp, min_52, change_52))
             if (change_52 > 0.9):
                 n_per_list = nv_stock.get_per_list(soup)
                 n_stat_link = nv_stock.get_code_url(code)
