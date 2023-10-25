@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
             print('code: {}, current_price: {}, min_52: {}, change_52: {}'.format(
             code, cp, min_52, change_52))
-            if (change_52 > 0.9):
+            if (change_52 > 0.95):
                 n_per_list = nv_stock.get_per_list(soup)
                 n_stat_link = nv_stock.get_code_url(code)
                 if (contain_negative(n_per_list)):
