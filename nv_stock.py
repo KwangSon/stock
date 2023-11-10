@@ -37,6 +37,23 @@ def get_per_list(soup):
         return ['', '', '', '', '', '', '', '', '', '']
     return rv_per
 
+def get_roe_list(soup):
+    rv_roe = []
+
+    cop_anal = soup.find("div", {"class": "cop_analysis"})
+    if (cop_anal is None):
+        return ['', '', '', '', '', '', '', '', '', '']
+
+    captions = cop_anal.find_all('tr')
+    for caption in captions:
+        if (caption.find('th').get_text() == 'ROE(지배주주)'):
+            per_list = caption.find_all('td')
+            for per in per_list:
+                rv_roe.append(per.get_text().strip().replace(',', ''))
+            break
+    if (len(rv_roe) != 10):
+        return ['', '', '', '', '', '', '', '', '', '']
+    return rv_roe
 
 def get_52_min_max(soup):
     table = soup.find('table', summary="투자의견 정보")
@@ -64,6 +81,11 @@ if __name__ == '__main__':
             soup = get_code_soup(self.test_code)
             per_list = get_per_list(soup)
             self.assertEqual(len(per_list), 10)
+        
+        def test_roe_list(self):
+            soup = get_code_soup(self.test_code)
+            roe_list = get_roe_list(soup)
+            self.assertEqual(len(roe_list), 10)
 
         def test_52_min_max(self):
             soup = get_code_soup(self.test_code)

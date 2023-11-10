@@ -66,7 +66,7 @@ if __name__ == '__main__':
     cnt = 0
 
     tb = pt()
-    tb.field_names = ["ID", "Name", "LowP", "NaverInfo", "NaverPER"]
+    tb.field_names = ["ID", "Name", "LowP", "NaverInfo", "ROE", "PER"]
 
     for code in company_codes:
         try:
@@ -76,17 +76,22 @@ if __name__ == '__main__':
             change_52 = min_52 / cp
 
             print('code: {}, current_price: {}, min_52: {}, change_52: {}'.format(
-            code, cp, min_52, change_52))
-            if (change_52 > 0.95):
+                code, cp, min_52, change_52))
+            if (change_52 > 0.90):
                 n_per_list = nv_stock.get_per_list(soup)
+                n_roe_list = nv_stock.get_roe_list(soup)
                 n_stat_link = nv_stock.get_code_url(code)
                 if (contain_negative(n_per_list)):
                     continue
-                if (n_per_list[8] and float(n_per_list[8]) < 10 and
-                    n_per_list[2] and float(n_per_list[2]) < 10): # prev quater and year PER
-                    tb.add_row([code, nv_stock.get_company_name(soup),
-                                round(change_52, 3), '<a href=' + '"' + n_stat_link + '"' + '>NLink</a>', str(n_per_list)])
-                    cnt += 1
+                if (not n_per_list[1] or not n_per_list[2] or not n_per_list[8]):
+                    continue
+                # prev quater and year PER
+                if (float(n_per_list[8]) > 15 or float(n_per_list[2]) > 15 or float(n_per_list[1]) > 15):
+                    continue
+
+                tb.add_row([code, nv_stock.get_company_name(soup),
+                            round(change_52, 3), '<a href=' + '"' + n_stat_link + '"' + '>NLink</a>', str(n_roe_list), str(n_per_list)])
+                cnt += 1
         except Exception as e:
             with open('bug.txt', 'a') as f:
                 f.writelines('{} : {}\n'.format(code, e))
