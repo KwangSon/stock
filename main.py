@@ -6,7 +6,7 @@ import html
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import nv_stock
-
+import job
 
 def send_email(user, pwd, recipient, subject, body):
 
@@ -102,7 +102,13 @@ if __name__ == '__main__':
 
     with open(".secret", "r") as json_file:
         secret_data = json.load(json_file)
+    
+    new_job_list = job.get_item()
 
     mail_header = "Report " + str(date.today())
+
+    if new_job_list.count > 0:
+        mail_header = "(New Job +)" + mail_header
+
     send_email(secret_data['mail_id'], secret_data['mail_key'],
                secret_data['recipient'], mail_header, html.unescape(tb.get_html_string(format=True)))
